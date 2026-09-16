@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Família de motor: agrupa cabeçotes tecnicamente equivalentes.
+// O interruptor "redirecionamentoAutomatico" é o disjuntor geral: se estiver
+// desligado, nenhuma aplicação dessa família redireciona pro WhatsApp,
+// mesmo que existam aplicações cadastradas e ativas.
+model Familia {
+  id                       String     @id @default(cuid())
+  nome                     String
+  descricao                String?
+  redirecionamentoAutomatico Boolean  @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  produtos                 Produto[]
+  aplicacoes               Aplicacao[]
+}
+
+// Produto: o cabeçote de fato, vendável, com ficha técnica e imagem.
+model Produto {
+  id               String      @id @default(cuid())
+  nome             String
+  slug             String      @unique
+  familiaId        String
+  familia          Familia     @relation(fields: [familiaId], references: [id])
+  motor            String
+  cilindrada       String
+  valvulas         Int
+  combustivel      String
+  condicao         String      @default("Remanufaturado")
+  garantiaMeses    Int         @default(12)
+  baseDeTroca      Boolean     @default(true)
+  mostrarPreco     Boolean     @default(false)
+  preco            Float?
+  descricao        String
+  imagem           String
+  tituloSEO        String
+  metaDescription  String
+  disponivel       Boolean     @default(true)
+  // rótulo interno pra diferenciar cabeçotes parecidos do mesmo veículo,
+  // ex: "Tucho Fino", "Tucho Grosso", "Roletado", "Câmara Coração".
+  // Não aparece pro cliente sozinho; usado no texto da etapa de desempate.
+  varianteTecnica  String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  aplicacoes       Aplicacao[]
+}
+
+// Aplicação: um veículo (marca/modelo/faixa de ano/motorização) que usa
+// um determinado produto. "ativa" liga/desliga só ESTA aplicação, sem
+// mexer nas outras da mesma família ou do mesmo produto.
+model Aplicacao {
+  id                String    @id @default(cuid())
+  montadora         String
+  modelo            String
+  anoInicial        Int
+  anoFinal          Int
+  cilindrada        String
+  valvulas          Int
+  combustivel       String
+  motorizacaoLabel  String    // texto simples mostrado ao cliente, ex: "1.6 16V Flex"
+  familiaId         String
+  familia           Familia   @relation(fields: [familiaId], references: [id])
+  produtoId         String
+  produto           Produto   @relation(fields: [produtoId], references: [id])
+  ativa             Boolean   @default(true)
+  observacoes       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+// Lead capturado quando a busca não encontra aplicação ativa/redirecionável.
+model Lead {
+  id          String   @id @default(cuid())
+  nome        String
+  oficina     String
+  whatsapp    String
+  cidade      String
+  veiculo     String
+  status      String   @default("Novo")
+  createdAt   DateTime @default(now())
+}
+
+// Registro de toda pesquisa realizada, mesmo sem lead, pra saber o que mais procuram.
+model Pesquisa {
+  id          String   @id @default(cuid())
+  montadora   String
+  modelo      String
+  ano         Int
+  motor       String
+  encontrado  Boolean
+  createdAt   DateTime @default(now())
+}

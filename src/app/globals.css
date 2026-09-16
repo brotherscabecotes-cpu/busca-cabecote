@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --bc-preto: #0b0b0b;
+  --bc-grafite: #2e2e2e;
+  --bc-amarelo: #ffc107;
+  --bc-branco: #ffffff;
+  --bc-cinza: #e5e5e5;
+}
+
+@theme inline {
+  --color-bc-preto: var(--bc-preto);
+  --color-bc-grafite: var(--bc-grafite);
+  --color-bc-amarelo: var(--bc-amarelo);
+  --color-bc-branco: var(--bc-branco);
+  --color-bc-cinza: var(--bc-cinza);
+  --font-display: var(--font-montserrat);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--bc-preto);
+  color: var(--bc-branco);
+}
+
+@media (pointer: coarse) {
+  .btn-toque {
+    min-height: 44px;
+  }
+}
