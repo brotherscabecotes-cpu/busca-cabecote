@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { criarLead } from "@/lib/actions";
+import { trackFormularioEnviado } from "@/lib/tracking";
 
 export default function LeadForm({ veiculo }: { veiculo: string }) {
   const [enviado, setEnviado] = useState(false);
@@ -21,6 +22,7 @@ export default function LeadForm({ veiculo }: { veiculo: string }) {
     });
     setEnviando(false);
     setEnviado(true);
+    trackFormularioEnviado(veiculo);
   }
 
   if (enviado) {

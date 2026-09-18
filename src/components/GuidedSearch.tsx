@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { AplicacaoPublica } from "@/lib/catalog";
-import { linkWhatsApp } from "@/lib/whatsapp";
 import LeadForm from "@/components/LeadForm";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { trackBuscaConcluida, trackBuscaIniciada } from "@/lib/tracking";
 
 type Passo = "marca" | "modelo" | "ano" | "motor" | "variante" | "resultado";
 
@@ -68,6 +69,19 @@ export default function GuidedSearch({ aplicacoes }: { aplicacoes: AplicacaoPubl
     : variantes.length === 1
       ? variantes[0]
       : undefined;
+
+  useEffect(() => {
+    if (marca) trackBuscaIniciada();
+    // dispara só quando a marca é escolhida (início real da busca), não a cada re-render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marca]);
+
+  useEffect(() => {
+    if (passo === "resultado") {
+      trackBuscaConcluida(`${marca} ${modelo} ${ano} ${motor}`, !!resultado?.disponivel);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [passo]);
 
   function reiniciar() {
     setMarca(null);
@@ -257,12 +271,14 @@ export default function GuidedSearch({ aplicacoes }: { aplicacoes: AplicacaoPubl
           <p className="mb-6 font-display text-2xl font-extrabold uppercase leading-tight sm:text-3xl">
             Encontramos o cabeçote para o seu veículo.
           </p>
-          <a
-            href={linkWhatsApp(mensagemWhatsApp)}
+          <WhatsAppButton
+            mensagem={mensagemWhatsApp}
+            veiculo={`${marca} ${modelo} ${ano} ${motor}`}
+            produtoNome={resultado.produtoNome}
             className="btn-toque block w-full rounded-md bg-bc-amarelo py-5 text-center font-display text-lg font-extrabold uppercase tracking-wide text-bc-preto shadow-lg shadow-bc-amarelo/20 hover:brightness-110 sm:inline-block sm:w-auto sm:px-14 sm:text-xl"
           >
             Quer saber o valor deste cabeçote?
-          </a>
+          </WhatsAppButton>
           <button
             onClick={reiniciar}
             className="btn-toque mx-auto mt-5 flex items-center justify-center gap-2 rounded-md border border-white/25 px-5 py-3 font-display text-sm font-bold uppercase tracking-wide text-white/80 transition hover:border-bc-amarelo hover:text-bc-amarelo"

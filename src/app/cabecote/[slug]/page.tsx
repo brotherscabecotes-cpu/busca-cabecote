@@ -4,8 +4,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { prisma } from "@/lib/db";
-import { linkWhatsApp } from "@/lib/whatsapp";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -31,6 +31,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: encontrado.produto.tituloSEO,
     description: encontrado.produto.metaDescription,
+    alternates: { canonical: `/cabecote/${slug}` },
+    openGraph: {
+      title: encontrado.produto.tituloSEO,
+      description: encontrado.produto.metaDescription,
+      url: `/cabecote/${slug}`,
+      images: [encontrado.produto.imagem],
+    },
   };
 }
 
@@ -46,8 +53,19 @@ export default async function CabecotePage({ params }: Props) {
 
   const mensagem = `Olá! Encontrei no Busca Cabeçote o ${produto.nome} e gostaria de solicitar um orçamento.`;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: produto.nome,
+    description: produto.metaDescription,
+    image: `https://buscacabecote.com${produto.imagem}`,
+    url: `https://buscacabecote.com/cabecote/${slug}`,
+    brand: { "@type": "Brand", name: "Busca Cabeçote" },
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <nav className="mb-6 font-mono text-xs uppercase tracking-wider text-white/40">
@@ -108,12 +126,14 @@ export default async function CabecotePage({ params }: Props) {
 
             <p className="mb-6 text-sm text-white/60">{produto.descricao}</p>
 
-            <a
-              href={linkWhatsApp(mensagem)}
+            <WhatsAppButton
+              mensagem={mensagem}
+              veiculo={produto.nome}
+              produtoNome={produto.nome}
               className="btn-toque block w-full rounded-md bg-bc-amarelo py-4 text-center font-display text-base font-extrabold uppercase tracking-wide text-bc-preto hover:brightness-110 sm:inline-block sm:w-auto sm:px-10"
             >
               Pedir este cabeçote agora
-            </a>
+            </WhatsAppButton>
           </div>
         </div>
       </main>

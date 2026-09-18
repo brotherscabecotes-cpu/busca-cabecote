@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { linkWhatsApp } from "@/lib/whatsapp";
+import { trackTelefoneClick, trackWhatsappClick } from "@/lib/tracking";
 
 export default function Footer() {
   return (
@@ -14,7 +17,7 @@ export default function Footer() {
           </p>
           <p className="mt-4 text-white/50">
             Dúvidas e informações:{" "}
-            <a href="tel:+551144573588" className="text-white/70 hover:text-bc-amarelo">
+            <a href="tel:+551144573588" onClick={trackTelefoneClick} className="text-white/70 hover:text-bc-amarelo">
               (11) 4457-3588
             </a>
           </p>
@@ -23,7 +26,13 @@ export default function Footer() {
           <Link href="/#buscar" className="hover:text-bc-amarelo">Buscar cabeçote</Link>
           <Link href="/#como-funciona" className="hover:text-bc-amarelo">Como funciona</Link>
           <Link href="/#duvidas" className="hover:text-bc-amarelo">Dúvidas</Link>
-          <a href={linkWhatsApp("Olá! Vim pelo site Busca Cabeçote.")} className="hover:text-bc-amarelo">WhatsApp</a>
+          <a
+            href={linkWhatsApp("Olá! Vim pelo site Busca Cabeçote.")}
+            onClick={() => trackWhatsappClick("rodapé")}
+            className="hover:text-bc-amarelo"
+          >
+            WhatsApp
+          </a>
         </nav>
       </div>
       <div className="mx-auto mt-8 max-w-6xl border-t border-white/10 pt-4 text-xs">
